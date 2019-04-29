@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.jiubo.erp.erpLogin.dao.LoginDAO">
+
+<select id="userLogin"  parameterType="com.jiubo.erp.erpLogin.bean.AccountDataBean" resultType="com.jiubo.erp.erpLogin.vo.LoginOutput">
+	SELECT     
+		dbo.Account_Data.Account_ID AS Acount_ID,
+		dbo.Account_Data.Account_Name AS account_name,
+		dbo.Account_Data.Account_Pwd AS account_pwd,
+		dbo.Account_Data.Account_State AS account_state
+	FROM         
+	  dbo.Account_Data 
+	WHERE 
+	  Account_Name=#{Account_Name} AND Account_Pwd=#{Account_Pwd} AND Account_State='在用'
+</select>
+
+<select id="selectPositionInfoByAccoutname" parameterType="com.jiubo.erp.erpLogin.bean.AccountDataBean" resultType="com.jiubo.erp.erpLogin.vo.PositionInfoOutPut">
+    SELECT     
+		 dbo.Account_Data.Account_Name AS account_name,
+		 dbo.Rule_Data.Rule_Name AS Rule_Name,
+		 dbo.Position_Data.Position_Name AS Position_Name
+	FROM         
+	   dbo.Rule_Data INNER JOIN
+	   dbo.Position_Rule_Data ON dbo.Rule_Data.Rule_ID = dbo.Position_Rule_Data.Rule_ID INNER JOIN
+	   dbo.Position_Data ON dbo.Position_Rule_Data.Position_ID=dbo.Position_Data.Position_ID INNER JOIN  
+	   dbo.Account_Data ON dbo.Position_Data.Position_ID=dbo.Account_Data.Position_ID 
+	WHERE 
+	     dbo.Rule_Data.Rule_Name LIKE '%员工%' OR dbo.Rule_Data.Rule_Name LIKE '%人员%' OR dbo.Rule_Data.Rule_Name like '%考勤%'
+	     AND dbo.Account_Data.Account_Name=#{Account_Name}
+</select>
+
+  
+<select id="selectByUserName"  parameterType="com.jiubo.erp.erpLogin.bean.AccountDataBean" resultType="java.lang.Integer">
+	 SElECT 
+	    COUNT(a.Account_Name) 
+	 FROM dbo.Account_Data a
+	 WHERE a.Account_Name=#{Account_Name}
+</select>
+
+<insert id="addAccountData" parameterType="com.jiubo.erp.erpLogin.bean.AccountDataBean">
+    INSERT INTO 
+      dbo.Account_Data 
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       <if test="Account_ID!=null and Account_ID!=''">
+         Account_ID,
+       </if>
+       <if test="Account_Name!=null and Account_Name!=''">
+         Account_Name,
+       </if>
+       <if test="Account_Pwd!=null and Account_Pwd!=''">
+         Account_Pwd,
+       </if>
+       <if test="Account_State!=null and Account_State!=''">
+         Account_State,
+       </if>
+       <if test="Position_ID!=null and Position_ID!=''">
+         Position_ID,
+       </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+        <if test="Account_ID!=null and Account_ID!=''">
+         #{Account_ID},
+       </if>
+       <if test="Account_Name!=null and Account_Name!=''">
+         #{Account_Name},
+       </if>
+       <if test="Account_Pwd!=null and Account_Pwd!=''">
+         #{Account_Pwd},
+       </if>
+       <if test="Account_State!=null and Account_State!=''">
+         #{Account_State},
+       </if>
+       <if test="Position_ID!=null and Position_ID!=''">
+         #{Position_ID},
+       </if>
+    </trim>
+</insert>
+
+<insert id="addRuleData" parameterType="com.jiubo.erp.erpLogin.bean.RuleDataBean">
+   INSERT INTO dbo.Rule_Data 
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       <if test="Rule_ID!=null and Rule_ID!=''">
+         Rule_ID,
+       </if>
+       <if test="Rule_Name!=null and Rule_Name!=''">
+         Rule_Name,
+       </if>
+       <if test="Rule_Group_ID!=null and Rule_Group_ID!=''">
+         Rule_Group_ID,
+       </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+        <if test="Rule_ID!=null and Rule_ID!=''">
+         #{Rule_ID},
+       </if>
+       <if test="Rule_Name!=null and Rule_Name!=''">
+         #{Rule_Name},
+       </if>
+       <if test="Rule_Group_ID!=null and Rule_Group_ID!=''">
+         #{Rule_Group_ID},
+       </if>
+    </trim>
+</insert>
+
+
+<insert id="addAccountRuleData"  parameterType="com.jiubo.erp.erpLogin.bean.AccountRuleData">
+  INSERT INTO dbo.Account_Rule_Data 
+   <trim prefix="(" suffix=")" suffixOverrides="," >
+       <if test="Rule_ID!=null and Rule_ID!=''">
+         A_R_ID,
+       </if>
+       <if test="Rule_Name!=null and Rule_Name!=''">
+         Account_ID,
+       </if>
+       <if test="Rule_Group_ID!=null and Rule_Group_ID!=''">
+         Rule_ID,
+       </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+        <if test="Rule_ID!=null and Rule_ID!=''">
+         #{A_R_ID},
+       </if>
+       <if test="Rule_Name!=null and Rule_Name!=''">
+         #{Account_ID},
+       </if>
+       <if test="Rule_Group_ID!=null and Rule_Group_ID!=''">
+         #{Rule_ID},
+       </if>
+    </trim>
+</insert>
+
+</mapper>

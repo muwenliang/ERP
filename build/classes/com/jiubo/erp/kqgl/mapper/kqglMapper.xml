@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.jiubo.erp.kqgl.dao.kqglDao">
+<!-- 加载考勤人员基础信息列表  isDelete是否被删除-->
+<select id="selectKqInfoList"  resultType="com.jiubo.erp.kqgl.vo.KqInfoResult">
+	 SELECT 
+	   DISTINCT 
+	   a.ID AS uId,
+	   a.Name AS name,
+	   a.JobNum AS jobNum,
+	   b.Name AS departname,
+	   d.Position_Name AS positionName
+	 FROM 
+	   T_Employee_Basic a 
+	   INNER JOIN T_Department b ON a.Department_ID=b.ID 
+	   INNER JOIN Account_Data c  ON a.Account=c.Account_ID 
+	   INNER JOIN Position_Data d ON c.Position_ID=d.Position_ID
+	WHERE
+	   a.JobNum != '0'
+	  	 
+</select>
+
+<!-- 搜索考勤人员考勤信息列表  isDelete是否被删除-->
+<select id="searchKqInfoList" parameterType="com.jiubo.erp.kqgl.vo.KqInfoResult" resultType="com.jiubo.erp.kqgl.vo.KqInfoResult">
+	 SELECT 
+	   DISTINCT 
+	   a.ID AS uId,
+	   a.Name AS name,
+	   a.JobNum AS jobNum,
+	   b.Name AS departname,
+	   d.Position_Name AS positionName,
+	   f.Name AS classTimeName,
+	   f.ShiftDate AS shiftDate,
+	   f.StartTime AS startTime,
+	   f.EndTime As endTime
+	   
+	 FROM 
+		 T_Employee_Basic a 
+		 INNER JOIN T_Department b ON a.Department_ID=b.ID 
+		 INNER JOIN Account_Data c  ON a.Account=c.Account_ID 
+		 INNER JOIN Position_Data d ON c.Position_ID=d.Position_ID
+		 INNER JOIN T_Att_PeopleShift e ON e.UserID = a.ID
+		 INNER JOIN T_Att_Shift f ON e.ShiftID=f.ID
+	<trim prefix="WHERE" prefixOverrides="AND | OR">
+     		<if test="name!=null and name!=''">
+       		    AND a.Name=#{name}
+     		</if>
+     		<if test="departname!=null and departname!=''">
+       		    AND b.Name=#{departname}
+     		</if>
+     		<if test="positionName!=null and positionName!=''">
+       		    AND d.Position_Name=#{positionName}
+     		</if>
+     		<if test="jobNum!=null and jobNum!=''">
+       		    AND a.JobNum=#{jobNum}
+     		</if>
+     		<if test="startDate!=null and startDate!=''">
+    		    AND f.ShiftDate&gt;=#{startDate} 
+		</if>
+		<if test="endDate!=null and endDate!=''">
+    		    AND	f.ShiftDate&lt;=#{endDate}
+		</if>
+     		AND a.JobNum != '0'
+   	</trim>	 
+</select>
+
+<!-- 个人班次查询 -->
+<select id="selectClassTimeList" parameterType="com.jiubo.erp.kqgl.vo.ClassTime" resultType="com.jiubo.erp.kqgl.vo.ClassTime">
+	SELECT 
+	   DISTINCT 
+	   	a.UserID AS userId,
+	   	b.ShiftDate AS ctshiftDate,
+	   	b.StartTime AS ctStartDate,
+	   	b.EndTime As ctEndDate
+	 FROM 
+		 T_Att_PeopleShift a
+		 INNER JOIN T_Att_Shift b ON a.ShiftID=b.ID
+	<trim prefix="WHERE" prefixOverrides="AND | OR">
+		<if test="ctStartDate!=null and ctStartDate!='' and ctEndDate!=null and ctEndDate!=''">
+    		    AND b.ShiftDate=#{ctEndDate} OR b.ShiftDate BETWEEN #{ctStartDate} AND #{ctEndDate}
+		</if>
+     		<if test="userId!=null and userId!=''">
+       		    AND a.UserID=#{userId}
+     		</if>
+   	</trim>
+</select>
+
+<!-- 查询个人打卡时间 -->
+<select id="selectPunchRecordList" parameterType="com.jiubo.erp.kqgl.vo.PunchRecord" resultType="com.jiubo.erp.kqgl.vo.PunchRecord">
+	 SELECT 
+	   	max(a.AttTime) AS maxAttTime,
+	   	min(a.AttTime) AS minAttTime
+	 FROM 
+		 T_Att_Attendance a
+		 INNER JOIN T_AttLog b ON a.AttLogID=b.ID
+	<trim prefix="WHERE" prefixOverrides="AND | OR">
+     		<if test="year!=null and year!=''">
+       		    AND b.Year=#{year}
+     		</if>
+     		<if test="month!=null and month!=''">
+       		    AND b.Month=#{month}
+     		</if>
+     		<if test="day!=null and day!=''">
+       		    AND b.Day=#{day}
+     		</if>
+     		<if test="userId!=null and userId!=''">
+       		    AND a.Userid=#{userId}
+     		</if>
+   	</trim>
+		 
+</select>
+
+
+
+
+<!-- 加载岗位类型列表 -->
+<select id="selectPositionTypeList"  resultType="com.jiubo.erp.kqgl.bean.PositionTypeBean">
+	SELECT     
+	  dbo.Position_Type.*
+    FROM         
+      dbo.Position_Type
+</select>
+
+<!-- 修改岗位类型 -->
+<update id="updatePositionType" parameterType="com.jiubo.erp.kqgl.bean.PositionTypeBean">
+   UPDATE 
+     dbo.Position_Type a 
+   SET
+      a.PositionType_Name=#{PositionType_Name}
+   WHERE 
+      a.PositionType_ID=#{PositionType_ID}
+</update>
+
+<!-- 删除岗位类型  -->
+<delete id="DeletePositionType" parameterType="com.jiubo.erp.kqgl.bean.PositionTypeBean">
+  DELETE FROM  dbo.Position_Type a WHERE a.PositionType_ID=#{PositionType_ID}
+</delete>
+
+<!-- 添加岗类型信息 -->
+<insert id="addPositionType" parameterType="com.jiubo.erp.kqgl.bean.PositionTypeBean">
+  INSERT INTO dbo.Position_Type
+  <trim prefix="(" suffix=")" suffixOverrides="," >
+    <if test="PositionType_ID!=null and PositionType_ID!=''">
+       PositionType_ID,
+     </if>
+     <if test="PositionType_Name!=null and PositionType_Name!=''">
+       PositionType_Name,
+     </if>
+  </trim>
+   <trim prefix="values (" suffix=")" suffixOverrides="," >
+     <if test="PositionType_ID!=null and PositionType_ID!=''">
+       #{PositionType_ID},
+     </if>
+     <if test="PositionType_Name!=null and PositionType_Name!=''">
+       #{PositionType_Name},
+     </if>
+   </trim>
+</insert>
+<!--职务信息列表加载-->
+<select id="selectPositionInfo" resultType="com.jiubo.erp.kqgl.vo.PositionResultInfo">
+	SELECT     
+	   a.Position_ID AS ID,
+	   a.Position_Name AS name,
+	   b.PositionType_Name AS typeName,
+	   a.IsPoint AS isPoint
+	FROM        
+	   dbo.Position_Data a LEFT JOIN
+	   dbo.Position_Type b ON  a.PositionType_ID=b.PositionType_ID
+</select>
+<!-- 添加职位信息 -->
+<insert id="addPositionInfo" parameterType="com.jiubo.erp.kqgl.bean.PositionDataBean">
+  INSERT INTO
+  dbo.Position_Data
+ <trim prefix="(" suffix=")" suffixOverrides="," >
+   <if test="Position_ID!=null and Position_ID!=''">
+	  Position_ID,
+   </if>
+   <if test="Position_Name!=null and Position_Name!=''">
+      Position_Name,
+   </if>
+   <if test="PositionType_ID!=null and PositionType_ID!=''">
+      PositionType_ID
+   </if>
+   <if test="IsPoint!=null and IsPoint!=''">
+      IsPoint
+   </if>
+ </trim>
+ <trim prefix="values (" suffix=")" suffixOverrides="," >
+    <if test="Position_ID!=null and Position_ID!=''">
+	  #{Position_ID},
+   </if>
+   <if test="Position_Name!=null and Position_Name!=''">
+     #{Position_Name},
+   </if>
+   <if test="PositionType_ID!=null and PositionType_ID!=''">
+      #{PositionType_ID},
+   </if>
+   <if test="IsPoint!=null and IsPoint!=''">
+      #{IsPoint},
+   </if>
+ </trim>
+</insert>
+
+<!--加载班组列表  -->
+<select id="selectAttshiftGroupList" resultType="com.jiubo.erp.kqgl.bean.AttshiftGroupBean">
+   SELECT    
+       dbo.T_Att_ShiftGroup.*
+   FROM         
+       dbo.T_Att_ShiftGroup
+</select>
+
+<!--添加班组  -->
+<insert id="addAttshiftGroup" parameterType="com.jiubo.erp.kqgl.bean.AttshiftGroupBean">
+	  INSERT INTO 
+	  dbo.T_Att_ShiftGroup
+	 <trim prefix="(" suffix=")" suffixOverrides="," >
+	     <if test="ID!=null and ID!=''">
+	         ID,
+	       </if>
+	       <if test="Name!=null and Name!=''">
+	         Name,
+	       </if>
+	       <if test="Remark!=null and Remark!=''">
+	         Remark,
+	       </if>
+	       <if test="isDelete!=null and isDelete!=''">
+	         isDelete,
+	       </if>
+	       <if test="CreateDate!=null and CreateDate!=''">
+	         CreateDate,
+	       </if>
+	       <if test="Creator!=null and Creator!=''">
+	         Creator,
+	       </if>
+	 </trim>
+	 <trim prefix="values (" suffix=")" suffixOverrides="," >
+	    <if test="ID!=null and ID!=''">
+	         #{ID},
+	       </if>
+	       <if test="Name!=null and Name!=''">
+	         #{Name},
+	       </if>
+	       <if test="Remark!=null and Remark!=''">
+	         #{Remark},
+	       </if>
+	       <if test="isDelete!=null and isDelete!=''">
+	          #{isDelete},
+	       </if>
+	       <if test="CreateDate!=null and CreateDate!=''">
+	         #{CreateDate},
+	       </if>
+	       <if test="Creator!=null and Creator!=''">
+	         #{Creator},
+	       </if>
+	 </trim>
+</insert>
+ 
+ <!--加载假期种类列表-->
+  <select id="selectAttLeaveTypelist" resultType="com.jiubo.erp.kqgl.bean.AttLeaveTypeBean">
+     SELECT    
+       dbo.T_Att_LeaveType.*
+     FROM 
+       dbo.T_Att_LeaveType 
+  </select>
+  
+  <!-- 添加假期种类 -->
+  <insert id="addAttLeaveType" parameterType="com.jiubo.erp.kqgl.bean.AttLeaveTypeBean">
+     INSERT INTO 
+     dbo.T_Att_LeaveType
+     <trim prefix="(" suffix=")" suffixOverrides="," >
+       <if test="ID!=null and ID!=''">
+         ID,
+       </if>
+          <if test="Name!=null and Name!=''">
+         Name,
+       </if>
+       <if test="IsDelete!=null and IsDelete!=''">
+         IsDelete,
+       </if>
+       <if test="CreateDate!=null and CreateDate!=''">
+         CreateDate,
+       </if>
+       <if test="Creator!=null and Creator!=''">
+         Creator,
+       </if>
+     </trim>
+     <trim prefix="values (" suffix=")" suffixOverrides="," >
+       <if test="ID!=null and ID!=''">
+         #{ID},
+       </if>
+       <if test="Name!=null and Name!=''">
+         #{Name},
+       </if>
+       <if test="IsDelete!=null and IsDelete!=''">
+         #{IsDelete},
+       </if>
+       <if test="CreateDate!=null and CreateDate!=''">
+         #{CreateDate},
+       </if>
+       <if test="Creator!=null and Creator!=''">
+         #{Creator},
+       </if>
+     </trim>
+  </insert>
+  
+  <!-- 加载排班规则信息  -->
+  <select id="selectScheduleResult" resultType="com.jiubo.erp.kqgl.vo.ScheduleQueryResult">
+		SELECT   
+			   a.ID AS id,
+			   a.Name AS longname,
+			  a.ShortName AS shortname,
+			  a.StartTime AS starttime,
+			  a.EndTime AS endtime,
+			  b.Name AS workType,
+			  a.Remarks AS remarks
+		FROM         
+		dbo.T_Att_ShiftSchedule a 
+		INNER JOIN T_Att_Shift b ON a.Type=b.Type
+  </select>
+  
+  <!-- 添加排班规则 -->
+  <insert id="addAttShiftSchedule" parameterType="com.jiubo.erp.kqgl.bean.AttShiftScheduleBean">
+     INSERT INTO 
+     dbo.T_Att_ShiftSchedule
+	 <trim prefix="(" suffix=")" suffixOverrides="," >
+	   <if test="ID!=null and ID!=''">
+         ID,
+       </if>
+       <if test="Name!=null and Name!=''">
+         Name,
+       </if>
+       <if test="ShortName!=null and ShortName!=''">
+         ShortName,
+       </if>
+       <if test="StartTime!=null and StartTime!=''">
+         StartTime,
+       </if>
+       <if test="EndTime!=null and EndTime!=''">
+          EndTime,
+       </if>
+       <if test="Type!=null and Type!=''">
+          Type,
+       </if>
+	   <if test="Remarks!=null and Remarks!=''">
+	     Remarks
+	   </if>
+	 </trim>
+	  <trim prefix="values (" suffix=")" suffixOverrides="," >
+	       <if test="ID!=null and ID!=''">
+	         #{ID},
+	       </if>
+	       <if test="Name!=null and Name!=''">
+	         #{Name},
+	       </if>
+	       <if test="ShortName!=null and ShortName!=''">
+	         #{ShortName},
+	       </if>
+	       <if test="StartTime!=null and StartTime!=''">
+	         #{StartTime},
+	       </if>
+	       <if test="EndTime!=null and EndTime!=''">
+	          #{EndTime},
+	       </if>
+	       <if test="Type!=null and Type!=''">
+	          #{Type},
+	       </if>
+		   <if test="Remarks!=null and Remarks!=''">
+		     #{Remarks},
+		   </if>
+	   </trim>
+  </insert>
+  <!--查询出勤规则列表  -->
+  <select id="selectRultTypeInfo" resultType="com.jiubo.erp.kqgl.bean.AttRuleTypeBean">
+     SELECT * FROM T_Att_RuleType a WHERE a.IsDelete='0'
+  </select>
+  <!-- 新增出勤规则 -->
+  <insert id="addRuleTypeInfo" parameterType="com.jiubo.erp.kqgl.bean.AttRuleTypeBean">
+    INSERT INTO 
+    T_Att_RuleType
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+	     <if test="ID!=null and ID!=''">
+	       ID,
+	     </if>
+	     <if test="Name!=null and Name!=''">
+	       Name,
+	     </if>
+	     <if test="Earlyminutes!=null and Earlyminutes!=''">
+	       Earlyminutes,
+	     </if>
+	      <if test="Lateminutes!=null and Lateminutes!=''">
+	       Lateminutes,
+	     </if>
+	      <if test="IsDelete!=null and IsDelete!=''">
+	       IsDelete,
+	     </if>
+	      <if test="CreateDate!=null and CreateDate!=''">
+	       CreateDate,
+	     </if>
+	      <if test="Creator!=null and Creator!=''">
+	       Creator,
+	     </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+         <if test="ID!=null and ID!=''">
+	       #{ID},
+	     </if>
+	     <if test="Name!=null and Name!=''">
+	       #{Name},
+	     </if>
+	     <if test="Earlyminutes!=null and Earlyminutes!=''">
+	       #{Earlyminutes},
+	     </if>
+	      <if test="Lateminutes!=null and Lateminutes!=''">
+	       #{Lateminutes},
+	     </if>
+	      <if test="IsDelete!=null and IsDelete!=''">
+	       #{IsDelete},
+	     </if>
+	      <if test="CreateDate!=null and CreateDate!=''">
+	       #{CreateDate},
+	     </if>
+	      <if test="Creator!=null and Creator!=''">
+	       #{Creator},
+	     </if>
+    </trim>
+  </insert>
+
+</mapper>
