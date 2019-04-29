@@ -141,8 +141,8 @@ public class KqController {
 					break;
 				case "7":
 					kqInfoResult.setFirstTime(pRecord.getMinAttTime());
-					kqInfoResult.setFirstTimeState("正常");
-					kqInfoResult.setLastTimeState("下班未打卡");
+					kqInfoResult.setFirstTimeState("上班未打卡");
+					kqInfoResult.setLastTimeState("正常");
 					break;
 
 				default:
