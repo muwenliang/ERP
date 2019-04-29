@@ -92,7 +92,7 @@ public class ToolClass {
 	 * @return
 	 */
 	public static String strDateTimeShiftStr(String str , Integer timeIndex) {
-		
+		str = str+"00";
         SimpleDateFormat sDateFormat1=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.000"); //加上时间
         SimpleDateFormat sDateFormat2=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.000"); //加上时间
         Date strDate;
@@ -100,7 +100,7 @@ public class ToolClass {
 			strDate = sDateFormat1.parse(str);
 			Date dateStr = new Date(strDate.getTime()+timeIndex*60*1000);
 			String sDate=sDateFormat2.format(dateStr);
-			System.out.println("-------时间转换--------------------------"+dateStr);
+//			System.out.println("-------时间转换--------------------------"+dateStr);
 			return sDate;
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block

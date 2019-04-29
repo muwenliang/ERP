@@ -86,105 +86,38 @@ public class KqController {
 	 List<KqInfoResult> kqInfoRes = this.service.searchKqInfoList(kqParam);
 	 
 	 
-	 PunchRecord pRecord= new PunchRecord();
+	 
 	 
 	 try {
 	    for (int i=0;i < kqInfoRes.size();i++) {
 	    	KqInfoResult kqInfoResult = kqInfoRes.get(i);
-	    	pRecord.setYear(kqInfoResult.getShiftDate().substring(0, 3));
-	    	pRecord.setMonth(kqInfoResult.getShiftDate().substring(5, 6)); 
-	    	pRecord.setDay(kqInfoResult.getShiftDate().substring(8, 9));
-	    	pRecord.setUserId(kqInfoResult.getuId());
-			System.out.println("打卡参数"+pRecord.getYear()+"-"+pRecord.getMonth()+"-"+pRecord.getDay());
-			
-			pRecord = this.service.selectPunchRecordList(pRecord).get(0);
-			
-			String index = new String();
-			
-			if (pRecord.getMaxAttTime().equals("") && pRecord.getMinAttTime().equals("")) {
+	    	if (kqInfoResult.getShiftDate() != null) {
+	    		System.out.println("getShiftDate"+kqInfoResult.getShiftDate());
+	    		PunchRecord pRecord= new PunchRecord();
+	    		pRecord.setYear(kqInfoResult.getShiftDate().substring(0, 4));
+		    	pRecord.setMonth(kqInfoResult.getShiftDate().substring(6, 7)); 
+		    	pRecord.setDay(kqInfoResult.getShiftDate().substring(9, 10));
+		    	pRecord.setUserId(kqInfoResult.getuId());
+				System.out.println("打卡参数"+pRecord.getYear()+"-"+pRecord.getMonth()+"-"+pRecord.getDay());
 				
-			}else if(pRecord.getMaxAttTime()==pRecord.getMinAttTime()){
-				
-				index = completKQInfo(pRecord.getMaxAttTime(),kqInfoResult.getStartTime(), kqInfoResult.getEndTime());
-				
-				switch (index) {
-				case "1":
-					kqInfoResult.setFirstTime(pRecord.getMinAttTime());
-					kqInfoResult.setFirstTimeState("正常");
-					kqInfoResult.setLastTimeState("下班未打卡");
-					break;
-				case "2":
-					kqInfoResult.setFirstTime(pRecord.getMinAttTime());
-					kqInfoResult.setFirstTimeState("迟到");
-					kqInfoResult.setLastTimeState("下班未打卡");				
-					break;
-				case "3":
-					kqInfoResult.setFirstTime(pRecord.getMinAttTime());
-					kqInfoResult.setFirstTimeState("旷工");
-					kqInfoResult.setLastTimeState("下班未打卡");
-					break;
-				case "4":
-					kqInfoResult.setFirstTime(pRecord.getMinAttTime());
-					kqInfoResult.setLastTime(pRecord.getMaxAttTime());
-					kqInfoResult.setFirstTimeState("打卡异常");
-					kqInfoResult.setLastTimeState("打卡异常");
-					break;
-				case "5":
-					kqInfoResult.setFirstTime(pRecord.getMinAttTime());
-					kqInfoResult.setFirstTimeState("上班未打卡");
-					kqInfoResult.setLastTimeState("旷工");
-					break;
-				case "6":
-					kqInfoResult.setFirstTime(pRecord.getMinAttTime());
-					kqInfoResult.setFirstTimeState("上班未打卡");
-					kqInfoResult.setLastTimeState("早退");				
-					break;
-				case "7":
-					kqInfoResult.setFirstTime(pRecord.getMinAttTime());
-					kqInfoResult.setFirstTimeState("上班未打卡");
-					kqInfoResult.setLastTimeState("正常");
-					break;
-
-				default:
-					break;
-				}
-			}else {
-				
-				kqInfoResult.setFirstTime(pRecord.getMinAttTime());
-				kqInfoResult.setFirstTimeState(completKQInfo(pRecord.getMaxAttTime(),kqInfoResult.getStartTime(), kqInfoResult.getEndTime()));
-				kqInfoResult.setFirstTime(pRecord.getMaxAttTime());
-				kqInfoResult.setLastTimeState(completKQInfo(pRecord.getMinAttTime(),kqInfoResult.getStartTime(), kqInfoResult.getEndTime()));
-				kqInfoRes.set(i, kqInfoResult);
-				
-				switch (index) {
-				case "1":
+				List<PunchRecord> prList = this.service.selectPunchRecordList(pRecord);
+				pRecord = prList.get(0);
+				if (prList.size()>0 && pRecord !=null) {
 					
-					break;
-				case "2":
-									
-					break;
-				case "3":
-					
-					break;
-				case "4":
-					
-					break;
-				case "5":
-					
-					break;
-				case "6":
-									
-					break;
-				case "7":
-					
-					break;
-
-				default:
-					break;
-				}
-				
+//					System.out.println("prList"+prList.size()+pRecord.toString());
+					if ( pRecord.getMaxAttTime()==null && pRecord.getMinAttTime()==null) {
+						
+					}else {
+						
+						kqInfoResult.setFirstTime(pRecord.getMinAttTime());
+						kqInfoResult.setFirstTimeState(completForeKQInfo(pRecord.getMinAttTime(), kqInfoResult.getStartTime(), kqInfoResult.getEndTime()));
+						kqInfoResult.setEndDate(pRecord.getMaxAttTime());
+						kqInfoResult.setLastTimeState(completAfterKQInfo(pRecord.getMaxAttTime(), kqInfoResult.getStartTime(), kqInfoResult.getEndTime()));
+						
+					}
 			}
-			
+	    	
+			}
 	    }
 	     System.out.println("kqList:"+kqInfoRes.size());
 	     return kqInfoRes;
@@ -194,6 +127,7 @@ public class KqController {
 		return null;
 	}
 }
+ 
  /**
   * 用来判断打卡时间在那个时间段
   * 上班时间之前---------------返回1-------正常
@@ -207,35 +141,46 @@ public class KqController {
   * @param beginTime 班次的上班时间
   * @param endTime 下班时间
   * @return
+  * 上午
   */
- public String completKQInfo(String mTime,String beginTime,String endTime) {
-	 Map<String, String> status = new HashMap<>();
+ public String completForeKQInfo(String mTime,String beginTime,String endTime) {
+	
 	 if (ToolClass.compare_date(mTime, beginTime)<=0) {
-		 
-		 return "1";
+		 return "正常";
 	 }else if (ToolClass.compare_date(mTime, beginTime)>0 &&
 				ToolClass.compare_date(mTime, ToolClass.strDateTimeShiftStr(beginTime, 30))<=0) {
-		 status.put("2", "迟到");
-		 return "2";
+		 return "迟到";
 	}else if (ToolClass.compare_date(mTime, ToolClass.strDateTimeShiftStr(beginTime, 30))>0 &&
 			ToolClass.compare_date(mTime, ToolClass.strDateTimeShiftStr(beginTime, 120))<=0) {
-		status.put("3", "旷工");
-		 return "3";
+		 return "旷工";
 	}else if (ToolClass.compare_date(mTime, ToolClass.strDateTimeShiftStr(beginTime, 120))>0 &&
 			ToolClass.compare_date(mTime, ToolClass.strDateTimeShiftStr(endTime, -180))<=0) {
-		status.put("4", "打卡异常");
-		 return "4";
+		return "打卡异常";
+	}else {
+		return "上班未打卡";
+	}
+}
+ /**
+  * 下午
+  * @param mTime
+  * @param beginTime
+  * @param endTime
+  * @return
+  */
+ public String completAfterKQInfo(String mTime,String beginTime,String endTime) {
+	 if (ToolClass.compare_date(mTime, ToolClass.strDateTimeShiftStr(beginTime, 120))<=0) {
+		 return "下班未打卡";
+	}else if (ToolClass.compare_date(mTime, ToolClass.strDateTimeShiftStr(beginTime, 120))>0 &&
+				ToolClass.compare_date(mTime, ToolClass.strDateTimeShiftStr(endTime, -180))<=0) {
+		return "打卡异常";
 	}else if (ToolClass.compare_date(mTime, ToolClass.strDateTimeShiftStr(endTime, -180))>0 &&
 			ToolClass.compare_date(mTime, ToolClass.strDateTimeShiftStr(endTime, -30))<=0) {
-		status.put("5", "迟到");
-		 return "5";
+		 return "旷工";
 	}else if (ToolClass.compare_date(mTime, ToolClass.strDateTimeShiftStr(endTime, -30))>0 &&
 			ToolClass.compare_date(mTime, endTime)<0) {
-		status.put("6", "早退");
-		 return "6";
+		 return "早退";
 	}else {
-		status.put("7", "正常");
-		 return "7";
+		 return "正常";
 	}
 }
  /**
