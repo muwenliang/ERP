@@ -1,5 +1,7 @@
 package com.jiubo.erp.rygl.vo;
 
+import java.util.List;
+
 public class UserInfo {
 	
 	//基础信息
@@ -53,10 +55,21 @@ public class UserInfo {
 	private String uCreateUser;
 	private String uRemark;
 	
-	
+	//家庭成员
+	private List<QueryFamilyResult> qFRs;
 	
 	
 	public UserInfo() {
+	}
+
+
+	public List<QueryFamilyResult> getqFRs() {
+		return qFRs;
+	}
+
+
+	public void setqFRs(List<QueryFamilyResult> qFRs) {
+		this.qFRs = qFRs;
 	}
 
 

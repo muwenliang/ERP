@@ -57,36 +57,6 @@ public class EmpController {
 	private EmpService service;
 
 	/**
-	 * 人员检索
-	 * 
-	 * @param param
-	 * @param response
-	 * @param request
-	 * @return
-	 */
-//	@RequestMapping(value = "/ryList", method = { RequestMethod.POST, RequestMethod.GET })
-//	public ModelAndView searchEmpList(QueryParam param, HttpServletResponse response, HttpServletRequest request) {
-//		ModelAndView mv = new ModelAndView();
-//
-//		// System.out.println("---前台获取-----"+param.getSearchType());
-//		// System.out.println("---前台获取-----"+param.getStartDate());
-//		// System.out.println("--前台获取-----"+param.getEndDate());
-//		// System.out.println("---前台获取-----"+param.getBirth());
-//
-//		try {
-//			this.service.initEmpList(param, request);
-//			this.service.initProjectList(request);
-//			this.service.initDepartList(request);
-//			this.service.initFamilList(param, request);
-//			mv.setViewName("employee");
-//			return mv;
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			ResponseMessageUtils.responseMessage(response, "查询失败!");
-//			return null;
-//		}
-//	}
-	/**
 	 * 全员搜索
 	 * @param param 属性包括所有人员信息
 	 * @param response
@@ -102,10 +72,8 @@ public class EmpController {
 		
 		String departName = new String();
 		String dpId = mapList.get("departId");
-		if (dpId!="0") {
-			
+		if (dpId!="0") {	
 			departName = departName(departList(response, request),dpId);
-//			System.out.println("----部门名称-----"+departName);
 		}
 		
 		qParam.setState(ToolClass.judgeStr(mapList.get("state")));
@@ -113,18 +81,14 @@ public class EmpController {
 		qParam.setDepartName(departName);
 		qParam.setSearchContent(mapList.get("searchContent"));
 
-//		System.out.println("emp查询到了----人员-----" + qParam.getState()+qParam.getDepartName()+qParam.getSearchContent()+qParam.getProjectId());
-		
 		try {
 			if (qParam.getSearchContent()!=null) {
-//				System.out.println("-----有搜索的内容-----"+qParam.getSearchContent());
 				allList = fuzzyQuery(qParam, request);
 				
 			}else {
 				System.out.println("-----搜索的内容-----");
 				qParam = new QueryParam();
 				allList = this.service.initEmpList(qParam, request);
-//				System.out.println("emp查询到了initEmpList----accountId-----" + allList.get(0).getAccountId());
 			}
 			System.out.println("emp查询到了initEmpList----accountId-----" + allList.get(0).getAccountId());
 			return allList;
@@ -256,19 +220,15 @@ public class EmpController {
 		String empName = qParam.getEmpName();
 		String shBirth = qParam.getShBirth();
 		
-//		System.out.println("---shBirth----"+shBirth);
+
 		Integer shBirthInt = Integer.valueOf(shBirth);
 		List<QueryFamilyResult> fmList = this.service.familyfuzzyQuery(qParam, request);
 		
 		List<QueryFamilyResult> fmListCource = this.service.familyfuzzyQuery(qParam, request);
 		List<QueryFamilyResult> fmListRes = new ArrayList<>();
-//		System.out.println("------条件上源数据----"+fmList.size());
+
 		if (fmListCource.size()>0) {
 			
-//			System.out.println("---F查询-----"+qParam.getChName());
-//			System.out.println("---F查询-----"+qParam.getEmpName());
-//			System.out.println("--F查询-----"+qParam.getShBirth());
-//			System.out.println("------fmListCource源数据----"+fmListCource.size());
 			if (empName!=null & chName!=null & shBirthInt>0) {
 				for (QueryFamilyResult fmListCour : fmListCource) {
 					String birth = fmListCour.getBirth().substring(6, 7);
@@ -277,7 +237,6 @@ public class EmpController {
 							||fmListCour.getName().contains(empName)) {
 						if (fmListCour.getChname().contains(chName)) {
 							if (shBirthInt==birthInt) {
-//								System.out.println("------3个条件----"+fmListRes.size());
 								fmListRes.add(fmListCour);
 							}
 						}
@@ -701,7 +660,7 @@ public class EmpController {
 		Map<String, String> resultM = new HashMap<>();
 		
 			
-		
+		System.out.println("--"+mapList.get("Name")+"--");
 		userInfo.setuName(mapList.get("Name"));
 		List<UserInfo> uList = this.service.searchUBInfo(userInfo);
 		
@@ -770,7 +729,8 @@ public class EmpController {
 			userInfo.setuEmergencyphone(mapList.get("emergencyPhone"));
 					
 			userInfo.setuLicenseType(mapList.get("licenseType"));
-			userInfo.setuDrivingExpe(mapList.get("drivingExpe"));		
+			userInfo.setuDrivingExpe(mapList.get("drivingExpe"));	
+//			userInfo.setqFRs(mapList.get("newFamilyNumList"));
 			
 
 			String newDate = ToolClass.strDateTimeStr(new Date());
@@ -795,20 +755,10 @@ public class EmpController {
 		
 		
 	}
-	
-	/**
-	 * 添加ERP账号
-	 * @param uInfo 账号的基本信息：初始密码，状态，职位id
-	 * @return
-	 */
-//	public UserInfo insertAccountInfo(UserInfo uInfo) {
-//		
-//	}
-	
 
 
 	/**
-	 * 插入家庭信息
+	 * 插入和更新家庭信息
 	 * 
 	 * @param param
 	 * @param response
