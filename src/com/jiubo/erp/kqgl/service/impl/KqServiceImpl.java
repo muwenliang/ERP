@@ -30,8 +30,8 @@ public class KqServiceImpl implements KqService {
 	private kqglDao dao;
 	
 	@Override
-	public List<KqInfoResult> selectKqInfoList(){
-		List<KqInfoResult> kqInfoList = this.dao.selectKqInfoList();
+	public List<KqInfoResult> selectKqInfoList(KqInfoResult kResult){
+		List<KqInfoResult> kqInfoList = this.dao.selectKqInfoList(kResult);
 		return kqInfoList;
 	}
 	

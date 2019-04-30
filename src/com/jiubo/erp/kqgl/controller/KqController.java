@@ -45,8 +45,17 @@ public class KqController {
  @RequestMapping(value="/allKQBaseInfo")
  private List<KqInfoResult> allKQInfo(HttpServletRequest request,HttpServletResponse response) {
 	
+	 	KqInfoResult kqParam = new KqInfoResult();
+		Map<String, String> mapList = ToolClass.mapShiftStr(request);
+		
+			
+		kqParam.setName(mapList.get("name"));
+		kqParam.setDepartname(mapList.get("dpId"));
+		kqParam.setPositionName(mapList.get("positionName"));
+		kqParam.setJobNum(mapList.get("jobNum"));
+		
 		 try {
-		    List<KqInfoResult> kqInfoList = this.service.selectKqInfoList();
+		    List<KqInfoResult> kqInfoList = this.service.selectKqInfoList(kqParam);
 		     System.out.println("kqList:"+kqInfoList.size());
 		     return kqInfoList;
 		} catch (Exception e) {
@@ -84,42 +93,48 @@ public class KqController {
 		}
 	 
 	 List<KqInfoResult> kqInfoRes = this.service.searchKqInfoList(kqParam);
-	 System.out.println("---班型测试kqInfoRes----"+kqInfoRes.size()+kqParam.getEndDate()+kqParam.getStartDate());
+//	 System.out.println("---班型测试kqInfoRes----"+kqInfoRes.size()+kqParam.getEndDate()+kqParam.getStartDate());
 	 
+	 //查询班次数据为空时执行，返回基本信息
+	 if (kqInfoRes.size()<1) {
+		 kqInfoRes=this.service.selectKqInfoList(kqParam);
+//		 System.out.println("kqInfoRes:"+kqInfoRes.size());
+		 return kqInfoRes;
+	}
 	 
 	 
 	 try {
-//	    for (int i=0;i < kqInfoRes.size();i++) {
-//	    	KqInfoResult kqInfoResult = kqInfoRes.get(i);
-//	    	if (kqInfoResult.getShiftDate() != null) {
-//	    		System.out.println("getShiftDate"+kqInfoResult.getShiftDate());
-//	    		PunchRecord pRecord= new PunchRecord();
-//	    		pRecord.setYear(kqInfoResult.getShiftDate().substring(0, 4));
-//		    	pRecord.setMonth(kqInfoResult.getShiftDate().substring(6, 7)); 
-//		    	pRecord.setDay(kqInfoResult.getShiftDate().substring(9, 10));
-//		    	pRecord.setUserId(kqInfoResult.getuId());
-//				System.out.println("打卡参数"+pRecord.getYear()+"-"+pRecord.getMonth()+"-"+pRecord.getDay());
-//				
-//				List<PunchRecord> prList = this.service.selectPunchRecordList(pRecord);
-//				pRecord = prList.get(0);
-//				if (prList.size()>0 && pRecord !=null) {
-//					
-////					System.out.println("prList"+prList.size()+pRecord.toString());
-//					if ( pRecord.getMaxAttTime()==null && pRecord.getMinAttTime()==null) {
-//						
-//					}else {
-//						
-//						kqInfoResult.setFirstTime(pRecord.getMinAttTime());
-//						kqInfoResult.setFirstTimeState(completForeKQInfo(pRecord.getMinAttTime(), kqInfoResult.getStartTime(), kqInfoResult.getEndTime()));
-//						kqInfoResult.setEndDate(pRecord.getMaxAttTime());
-//						kqInfoResult.setLastTimeState(completAfterKQInfo(pRecord.getMaxAttTime(), kqInfoResult.getStartTime(), kqInfoResult.getEndTime()));
-//						
-//					}
-//			}
-//	    	
-//			}
-//	    }
-//	     System.out.println("kqList:"+kqInfoRes.size());
+	    for (int i=0;i < kqInfoRes.size();i++) {
+	    	KqInfoResult kqInfoResult = kqInfoRes.get(i);
+	    	if (kqInfoResult.getShiftDate() != null) {
+	    		System.out.println("getShiftDate"+kqInfoResult.getShiftDate());
+	    		PunchRecord pRecord= new PunchRecord();
+	    		pRecord.setYear(kqInfoResult.getShiftDate().substring(0, 4));
+		    	pRecord.setMonth(kqInfoResult.getShiftDate().substring(6, 7)); 
+		    	pRecord.setDay(kqInfoResult.getShiftDate().substring(9, 10));
+		    	pRecord.setUserId(kqInfoResult.getuId());
+				System.out.println("打卡参数"+pRecord.getYear()+"-"+pRecord.getMonth()+"-"+pRecord.getDay());
+				
+				List<PunchRecord> prList = this.service.selectPunchRecordList(pRecord);
+				pRecord = prList.get(0);
+				if (prList.size()>0 && pRecord !=null) {
+					
+//					System.out.println("prList"+prList.size()+pRecord.toString());
+					if ( pRecord.getMaxAttTime()==null && pRecord.getMinAttTime()==null) {
+						
+					}else {
+						
+						kqInfoResult.setFirstTime(pRecord.getMinAttTime());
+						kqInfoResult.setFirstTimeState(completForeKQInfo(pRecord.getMinAttTime(), kqInfoResult.getStartTime(), kqInfoResult.getEndTime()));
+						kqInfoResult.setEndDate(pRecord.getMaxAttTime());
+						kqInfoResult.setLastTimeState(completAfterKQInfo(pRecord.getMaxAttTime(), kqInfoResult.getStartTime(), kqInfoResult.getEndTime()));
+						
+					}
+			}
+	    	
+			}
+	    }
+	     System.out.println("kqList:"+kqInfoRes.size());
 	     return kqInfoRes;
 	} catch (Exception e) {
 		e.printStackTrace();

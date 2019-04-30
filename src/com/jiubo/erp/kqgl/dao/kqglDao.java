@@ -17,7 +17,7 @@ import com.jiubo.erp.rygl.bean.DepartmentBean;
 
 public interface kqglDao {
 	//加载考勤基础信息列表
-	List<KqInfoResult> selectKqInfoList();
+	List<KqInfoResult> selectKqInfoList(KqInfoResult kResult);
 	//搜索考勤信息列表
 	List<KqInfoResult> searchKqInfoList(KqInfoResult kResult);
 	//查询班次列表

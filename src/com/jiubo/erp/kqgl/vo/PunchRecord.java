@@ -1,5 +1,6 @@
 package com.jiubo.erp.kqgl.vo;
 
+//打卡
 public class PunchRecord {
 	private String userId;
 	private String maxAttTime;

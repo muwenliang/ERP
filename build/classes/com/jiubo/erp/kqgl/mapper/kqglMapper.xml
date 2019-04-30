@@ -6,21 +6,35 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 <mapper namespace="com.jiubo.erp.kqgl.dao.kqglDao">
 <!-- 加载考勤人员基础信息列表  isDelete是否被删除-->
-<select id="selectKqInfoList"  resultType="com.jiubo.erp.kqgl.vo.KqInfoResult">
+<select id="selectKqInfoList" parameterType="com.jiubo.erp.kqgl.vo.KqInfoResult" resultType="com.jiubo.erp.kqgl.vo.KqInfoResult">
 	 SELECT 
 	   DISTINCT 
 	   a.ID AS uId,
 	   a.Name AS name,
 	   a.JobNum AS jobNum,
 	   b.Name AS departname,
+	   b.ID AS departId,
 	   d.Position_Name AS positionName
 	 FROM 
 	   T_Employee_Basic a 
 	   INNER JOIN T_Department b ON a.Department_ID=b.ID 
 	   INNER JOIN Account_Data c  ON a.Account=c.Account_ID 
 	   INNER JOIN Position_Data d ON c.Position_ID=d.Position_ID
-	WHERE
-	   a.JobNum != '0'
+	<trim prefix="WHERE" prefixOverrides="AND | OR">
+     		<if test="name!=null and name!=''">
+       		    AND a.Name=#{name}
+     		</if>
+     		<if test="departname!=null and departname!=''">
+       		    AND b.Name=#{departname}
+     		</if>
+     		<if test="positionName!=null and positionName!=''">
+       		    AND d.Position_Name=#{positionName}
+     		</if>
+     		<if test="jobNum!=null and jobNum!=''">
+       		    AND a.JobNum=#{jobNum}
+     		</if>
+     		AND a.JobNum != '0'
+   	</trim>
 	  	 
 </select>
 
@@ -32,6 +46,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	   a.Name AS name,
 	   a.JobNum AS jobNum,
 	   b.Name AS departname,
+	   b.ID AS departId,
 	   d.Position_Name AS positionName,
 	   f.Name AS classTimeName,
 	   f.ShiftDate AS shiftDate,

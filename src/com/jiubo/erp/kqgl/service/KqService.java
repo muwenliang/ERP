@@ -19,7 +19,7 @@ import com.jiubo.erp.rygl.bean.DepartmentBean;
 
 public interface KqService {
 	    //查询考勤人员基础信息列表
-		List<KqInfoResult> selectKqInfoList();
+		List<KqInfoResult> selectKqInfoList(KqInfoResult kResult);
 		//查询考勤人员班次信息列表
 		List<KqInfoResult> searchKqInfoList(KqInfoResult kResult);
 		//查询个人班次列表
