@@ -82,44 +82,44 @@ public class KqController {
 		if (kqParam.getEndDate().equals("")) {
 			kqParam.setEndDate(ToolClass.inquirNowDate());
 		}
-	 System.out.println("---班型测试kqInfoRes----"+kqParam.getEndDate()+kqParam.getStartDate());
-	 List<KqInfoResult> kqInfoRes = this.service.searchKqInfoList(kqParam);
 	 
+	 List<KqInfoResult> kqInfoRes = this.service.searchKqInfoList(kqParam);
+	 System.out.println("---班型测试kqInfoRes----"+kqInfoRes.size()+kqParam.getEndDate()+kqParam.getStartDate());
 	 
 	 
 	 
 	 try {
-	    for (int i=0;i < kqInfoRes.size();i++) {
-	    	KqInfoResult kqInfoResult = kqInfoRes.get(i);
-	    	if (kqInfoResult.getShiftDate() != null) {
-	    		System.out.println("getShiftDate"+kqInfoResult.getShiftDate());
-	    		PunchRecord pRecord= new PunchRecord();
-	    		pRecord.setYear(kqInfoResult.getShiftDate().substring(0, 4));
-		    	pRecord.setMonth(kqInfoResult.getShiftDate().substring(6, 7)); 
-		    	pRecord.setDay(kqInfoResult.getShiftDate().substring(9, 10));
-		    	pRecord.setUserId(kqInfoResult.getuId());
-				System.out.println("打卡参数"+pRecord.getYear()+"-"+pRecord.getMonth()+"-"+pRecord.getDay());
-				
-				List<PunchRecord> prList = this.service.selectPunchRecordList(pRecord);
-				pRecord = prList.get(0);
-				if (prList.size()>0 && pRecord !=null) {
-					
-//					System.out.println("prList"+prList.size()+pRecord.toString());
-					if ( pRecord.getMaxAttTime()==null && pRecord.getMinAttTime()==null) {
-						
-					}else {
-						
-						kqInfoResult.setFirstTime(pRecord.getMinAttTime());
-						kqInfoResult.setFirstTimeState(completForeKQInfo(pRecord.getMinAttTime(), kqInfoResult.getStartTime(), kqInfoResult.getEndTime()));
-						kqInfoResult.setEndDate(pRecord.getMaxAttTime());
-						kqInfoResult.setLastTimeState(completAfterKQInfo(pRecord.getMaxAttTime(), kqInfoResult.getStartTime(), kqInfoResult.getEndTime()));
-						
-					}
-			}
-	    	
-			}
-	    }
-	     System.out.println("kqList:"+kqInfoRes.size());
+//	    for (int i=0;i < kqInfoRes.size();i++) {
+//	    	KqInfoResult kqInfoResult = kqInfoRes.get(i);
+//	    	if (kqInfoResult.getShiftDate() != null) {
+//	    		System.out.println("getShiftDate"+kqInfoResult.getShiftDate());
+//	    		PunchRecord pRecord= new PunchRecord();
+//	    		pRecord.setYear(kqInfoResult.getShiftDate().substring(0, 4));
+//		    	pRecord.setMonth(kqInfoResult.getShiftDate().substring(6, 7)); 
+//		    	pRecord.setDay(kqInfoResult.getShiftDate().substring(9, 10));
+//		    	pRecord.setUserId(kqInfoResult.getuId());
+//				System.out.println("打卡参数"+pRecord.getYear()+"-"+pRecord.getMonth()+"-"+pRecord.getDay());
+//				
+//				List<PunchRecord> prList = this.service.selectPunchRecordList(pRecord);
+//				pRecord = prList.get(0);
+//				if (prList.size()>0 && pRecord !=null) {
+//					
+////					System.out.println("prList"+prList.size()+pRecord.toString());
+//					if ( pRecord.getMaxAttTime()==null && pRecord.getMinAttTime()==null) {
+//						
+//					}else {
+//						
+//						kqInfoResult.setFirstTime(pRecord.getMinAttTime());
+//						kqInfoResult.setFirstTimeState(completForeKQInfo(pRecord.getMinAttTime(), kqInfoResult.getStartTime(), kqInfoResult.getEndTime()));
+//						kqInfoResult.setEndDate(pRecord.getMaxAttTime());
+//						kqInfoResult.setLastTimeState(completAfterKQInfo(pRecord.getMaxAttTime(), kqInfoResult.getStartTime(), kqInfoResult.getEndTime()));
+//						
+//					}
+//			}
+//	    	
+//			}
+//	    }
+//	     System.out.println("kqList:"+kqInfoRes.size());
 	     return kqInfoRes;
 	} catch (Exception e) {
 		e.printStackTrace();
